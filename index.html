@@ -156,6 +156,10 @@ body{word-break:auto-phrase;line-break:strict;overflow-wrap:anywhere}
 p,li,dd,h3,figcaption{text-wrap:pretty}
 h1,h2,h3,.k2,.h2,.when{text-wrap:balance}
 .nb{display:inline-block}
+#hello .hset{margin:2px 0;font-size:17px}
+#hello .hset b{font-family:var(--mincho);font-weight:900;font-size:clamp(30px,9vw,40px);color:var(--gold);margin-left:.3em}
+.komaki .kset{margin:2px 0 0;font-size:16px}
+.komaki .kset b{font-family:var(--mincho);font-weight:900;font-size:clamp(26px,8vw,34px);margin-left:.3em}
 @media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 </style>
 
@@ -164,7 +168,8 @@ h1,h2,h3,.k2,.h2,.when{text-wrap:balance}
     <p class="h1">卒業旅行 in 熊本　いよいよです</p>
     <p class="h2" id="hello-t">集合は<br><em>小牧空港</em></p>
     <p class="h3"><span class="nb">県営名古屋空港（小牧）から</span><span class="nb">出発します。</span><br><b>セントレアではありません。</b></p>
-    <p class="h4">11月28日（土）7:15発　FDA321</p>
+    <p class="hset"><span class="nb">11月28日（土）</span><b class="nb">集合 6:30</b></p>
+    <p class="h4"><span class="nb">出発 7:15</span>　<span class="nb">FDA321</span></p>
     <button type="button" id="hello-ok">小牧ですね、わかりました</button>
   </div>
 </div>
@@ -191,7 +196,8 @@ h1,h2,h3,.k2,.h2,.when{text-wrap:balance}
 <section class="komaki" aria-label="出発する空港">
   <p class="k1">出発する空港</p>
   <p class="k2"><em>小牧</em>から出発です</p>
-  <p class="k3"><span class="nb">県営名古屋空港（小牧）</span>　<span class="nb">11月28日（土）7:15発</span>　<span class="nb">FDA321（フジドリームエアラインズ）</span></p>
+  <p class="kset"><span class="nb">11月28日（土）</span><b class="nb">集合 6:30</b></p>
+  <p class="k3"><span class="nb">県営名古屋空港（小牧）</span>　<span class="nb">7:15発</span>　<span class="nb">FDA321（フジドリームエアラインズ）</span></p>
   <p class="k4"><b class="nb">セントレア（中部国際空港）ではありません。</b><span class="nb">帰りも小牧に着きます。</span></p>
 </section>
 <nav aria-label="目次">
@@ -203,6 +209,12 @@ h1,h2,h3,.k2,.h2,.when{text-wrap:balance}
 <section class="day d1" id="day1">
   <div class="dayhead"><h2>1日目</h2><p>11月28日（土）</p><span class="theme">阿蘇・熊本城・城下の夜</span></div>
   <ol class="tl">
+    <li>
+      <div class="t">6:30<small>集合</small></div>
+      <div class="body"><h3>県営名古屋空港（小牧）に集合</h3>
+        <p class="warn" style="font-size:14px;margin-top:4px">セントレアではありません</p>
+      </div>
+    </li>
     <li>
       <div class="t">7:15<small>小牧発</small></div>
       <div class="body"><h3>県営名古屋空港（小牧）を出発</h3>
