@@ -67,7 +67,7 @@ header h1{font-family:var(--mincho);font-weight:700;font-size:16px;margin:0;lett
 <div id="intro"><div>
   <small>卒業旅行 in 熊本</small>
   <h2><span class="nb">空から見る</span><span class="nb">2日間</span></h2>
-  <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどります。</span><br><span class="nb">1分半ほどです。</span><span class="nb">とちゅうで止めて、</span><span class="nb">指で見回すこともできます。</span></p>
+  <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどります。</span><br><span class="nb">2分半ほどです。</span><span class="nb">とちゅうで止めて、</span><span class="nb">指で見回すこともできます。</span></p>
   <button id="go" type="button">飛びはじめる</button>
 </div></div>
 <section class="card" aria-live="polite">
@@ -113,9 +113,9 @@ const map=new maplibregl.Map({container:'map',center:[130.72,32.74],zoom:8.6,pit
   sources:{photo:{type:'raster',tiles:['https://cyberjapandata.gsi.go.jp/xyz/seamlessphoto/{z}/{x}/{y}.jpg'],tileSize:256,minzoom:2,maxzoom:18,attribution:'写真・地図・標高：国土地理院'},
    dem:{type:'raster-dem',tiles:['gsidem://cyberjapandata.gsi.go.jp/xyz/dem_png/{z}/{x}/{y}.png'],tileSize:256,minzoom:1,maxzoom:14,encoding:'terrarium'},
    v:{type:'vector',tiles:['https://cyberjapandata.gsi.go.jp/xyz/experimental_bvmap/{z}/{x}/{y}.pbf'],minzoom:4,maxzoom:16}},
-  layers:[{id:'bg',type:'background',paint:{'background-color':'#1b2a3a'}},
+  layers:[{id:'bg',type:'background',paint:{'background-color':'#1f3f63'}},
    {id:'photo',type:'raster',source:'photo',paint:{'raster-saturation':0.12,'raster-contrast':0.06,'raster-fade-duration':200}},
-   {id:'bld',type:'fill-extrusion',source:'v','source-layer':'building',minzoom:14.5,paint:{'fill-extrusion-color':'#e9e4d8','fill-extrusion-height':['match',['get','ftCode'],3112,26,3103,22,9],'fill-extrusion-opacity':0.72}}]}});
+   {id:'bld',type:'fill-extrusion',source:'v','source-layer':'building',minzoom:14.5,paint:{'fill-extrusion-color':'#e4dccb','fill-extrusion-height':['match',['get','ftCode'],3112,26,3103,22,9],'fill-extrusion-opacity':0.58}}]}});
 map.addControl(new maplibregl.AttributionControl({compact:true}),'bottom-right');
 map.on('error',()=>{});
 const line=S.flatMap((s,i)=>[...(s.rail||[]),s.ll]);
@@ -146,8 +146,10 @@ async function goTo(i,k,fly){const s=S[i];cur=i;
     show(i);if(!await move('easeTo',{center:s.ll,zoom:s.z,pitch:62,bearing:s.b,duration:2600},k))return false}
   else{const dist=km(from,s.ll);show(i);
     if(!await move('flyTo',{center:s.ll,zoom:s.z,pitch:62,bearing:s.b,duration:Math.min(9000,Math.max(3200,2600+dist*260)),curve:dist>6?1.25:0.9},k))return false}
-  if(!await move('easeTo',{bearing:s.b+s.o,pitch:66,duration:Math.max(4200,s.o*38),easing:t=>t},k))return false;
-  return wait(500,k)}
+  // 着いたら、写真がはっきりするのを少し待ってから、ゆっくり回る
+  await Promise.race([new Promise(r=>map.once('idle',r)),wait(1800,k)]);if(k!==tok)return false;
+  if(!await move('easeTo',{bearing:s.b+s.o,pitch:66,duration:Math.max(5600,s.o*42),easing:t=>t},k))return false;
+  return wait(400,k)}
 async function run(from){const k=++tok;playing=true;$('play').textContent='止める';
   for(let i=from;i<S.length;i++){if(!await goTo(i,k,true))return}
   if(k===tok){playing=false;$('play').textContent='もう一度';cur=-1;show(S.length-1);map.flyTo({center:[130.66,32.72],zoom:8.9,pitch:40,bearing:15,duration:5000,essential:true})}}
