@@ -205,6 +205,43 @@ if(REC){window.__state='ready';window.__rec=async(doRec)=>{const cv=map.getCanva
   if(doRec){await new Promise(r=>{mr.onstop=r;mr.stop()});const b=new Blob(chunks,{type:'video/webm'});window.__size=b.size;window.__blob=b;
     const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kumamoto-sora-rokuga.webm';document.body.appendChild(a);a.click()}
   window.__state='done'}}
+// ---- 1コマずつ録る（画面が消えていても同じ速さで録れる）。?rec のときだけ
+if(REC){
+  const M=([x,y])=>[x,Math.log(Math.tan(Math.PI/4+y*Math.PI/360))*180/Math.PI],U=([x,y])=>[x,(Math.atan(Math.exp(y*Math.PI/180))*2-Math.PI/2)*180/Math.PI];
+  const ez=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,lerp=(a,b,t)=>a+(b-a)*t,ang=(a,b,t)=>a+(((b-a)%360+540)%360-180)*t;
+  // 場面の並び：[種類, 長さ(秒), ...]
+  const OV={c:[130.72,32.74],z:8.6,p:35,b:20},SEG=[];let t=0,pv={c:OV.c,z:8.8,p:35,b:34};const CAP=[];
+  SEG.push({k:'pan',t0:0,d:3.2,a:OV,b:pv});t=3.2;
+  S.forEach((s,i)=>{const to={c:s.ll,z:s.z,p:62,b:s.b};
+    if(s.rail){const pts=[pv.c,...s.rail,s.ll].map(M),len=[0];for(let j=1;j<pts.length;j++)len.push(len[j-1]+Math.hypot(pts[j][0]-pts[j-1][0],pts[j][1]-pts[j-1][1]));
+      CAP.push(['rail',t]);SEG.push({k:'rail',t0:t,d:20,pts,len,a:pv,b:to});t+=20;CAP.push(['s'+i,t-2.4])}
+    else{const dist=km(pv.c,s.ll),d=Math.min(8.5,Math.max(3.4,2.8+dist*0.24));CAP.push(['s'+i,t+0.3]);SEG.push({k:'fly',t0:t,d,a:pv,b:to,hop:Math.max(0,Math.min(5.2,Math.log2(Math.max(1,dist/1.6))*1.05))});t+=d}
+    const od=Math.max(6,s.o*0.045);const o2={c:s.ll,z:s.z,p:66,b:s.b+s.o};SEG.push({k:'orb',t0:t,d:od,a:to,b:o2});t+=od;pv=o2});
+  CAP.push(['end',t]);const fin={c:[130.66,32.72],z:8.9,p:40,b:15};SEG.push({k:'fly',t0:t,d:6,a:pv,b:fin,hop:0.6});t+=6;SEG.push({k:'pan',t0:t,d:1.6,a:fin,b:{c:fin.c,z:8.9,p:40,b:17}});t+=1.6;
+  const TOTAL=t;window.__tl={total:TOTAL,cap:CAP.map(([n,x])=>[n,+x.toFixed(2)])};
+  const camAt=T=>{let g=SEG[SEG.length-1];for(const q of SEG){if(T<q.t0+q.d){g=q;break}}const u=Math.min(1,Math.max(0,(T-g.t0)/g.d));
+    if(g.k==='orb'||g.k==='pan')return{center:[lerp(g.a.c[0],g.b.c[0],u),lerp(g.a.c[1],g.b.c[1],u)],zoom:lerp(g.a.z,g.b.z,u),pitch:lerp(g.a.p,g.b.p,ez(u)),bearing:lerp(g.a.b,g.b.b,u)};
+    if(g.k==='fly'){const e=ez(u),a=M(g.a.c),b=M(g.b.c);return{center:U([lerp(a[0],b[0],e),lerp(a[1],b[1],e)]),zoom:lerp(g.a.z,g.b.z,e)-g.hop*Math.sin(Math.PI*e),pitch:lerp(g.a.p,g.b.p,e)-8*Math.sin(Math.PI*e),bearing:ang(g.a.b,g.b.b,e)};}
+    // 列車：道すじに沿って、少し先を見ながら進む
+    const L=g.len[g.len.length-1],at=x=>{x=Math.min(L,Math.max(0,x));let j=1;while(j<g.len.length-1&&g.len[j]<x)j++;const f=(x-g.len[j-1])/(g.len[j]-g.len[j-1]||1);return[lerp(g.pts[j-1][0],g.pts[j][0],f),lerp(g.pts[j-1][1],g.pts[j][1],f)]};
+    const e=u<.12?u*u/(.12*1.88):u>.88?1-(1-u)*(1-u)/(.12*1.88):(u-.06)/.88,x=e*L;let c=[0,0];for(let q=-3;q<=3;q++){const p=at(x+q*L*0.012);c[0]+=p[0]/7;c[1]+=p[1]/7}
+    const h=at(x+L*0.07),k0=at(x-L*0.03),hd=Math.atan2(h[0]-k0[0],h[1]-k0[1])*180/Math.PI,w=Math.min(1,u/.14),w2=Math.min(1,(1-u)/.12);
+    return{center:U(c),zoom:lerp(lerp(g.a.z,12.9,ez(w)),g.b.z,1-ez(w2)),pitch:lerp(g.a.p,66,ez(w))+(62-66)*(1-ez(w2)),bearing:ang(ang(g.a.b,hd+8,ez(w)),g.b.b,1-ez(w2))}};
+  window.__camAt=camAt;
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  window.__state='ready';
+  window.__shoot=async(doRec,fps=30)=>{window.__state=doRec?'recording':'warming';window.__prog=0;window.__err='';map.setPaintProperty('photo','raster-fade-duration',0);
+    const cv=map.getCanvas(),N=Math.round(TOTAL*fps),parts=[];let enc=null,kind='';
+    try{if(doRec){const cfgs=[['h264',{codec:'avc1.64002A',width:cv.width,height:cv.height,bitrate:14e6,framerate:fps,avc:{format:'annexb'}}],['vp9',{codec:'vp09.00.40.08',width:cv.width,height:cv.height,bitrate:12e6,framerate:fps}]];
+        for(const[kd,c]of cfgs){const r=await VideoEncoder.isConfigSupported(c);if(r.supported){kind=kd;enc=new VideoEncoder({output:ch=>{const b=new Uint8Array(ch.byteLength);ch.copyTo(b);
+              if(kind==='vp9'){const h=new DataView(new ArrayBuffer(12));h.setUint32(0,b.length,true);h.setUint32(4,Math.round(ch.timestamp*fps/1e6),true);parts.push(h.buffer)}parts.push(b)},error:e=>{window.__err='enc '+e.message}});enc.configure(c);break}}
+        if(!enc)throw new Error('no encoder');window.__kind=kind;
+        if(kind==='vp9'){const h=new DataView(new ArrayBuffer(32));'DKIF'.split('').forEach((ch,i)=>h.setUint8(i,ch.charCodeAt(0)));h.setUint16(6,32,true);'VP90'.split('').forEach((ch,i)=>h.setUint8(8+i,ch.charCodeAt(0)));h.setUint16(12,cv.width,true);h.setUint16(14,cv.height,true);h.setUint32(16,fps,true);h.setUint32(20,1,true);h.setUint32(24,N,true);parts.push(h.buffer)}}
+      for(let f=0;f<N;f+=(doRec?1:6)){map.jumpTo(camAt(f/fps));let n=0;do{map.redraw();if(map.areTilesLoaded())break;await sleep(30)}while(++n<(doRec?70:25));
+        if(doRec){map.redraw();const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/fps),duration:Math.round(1e6/fps)});enc.encode(vf,{keyFrame:f%60===0});vf.close();while(enc.encodeQueueSize>6)await sleep(10)}
+        window.__prog=f/N;if(f%15===0)await sleep(0);if(window.__err)throw new Error(window.__err)}
+      if(doRec){await enc.flush();enc.close();const b=new Blob(parts,{type:'application/octet-stream'});window.__size=b.size;const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kumamoto-sora-koma.'+(kind==='vp9'?'ivf':'h264');document.body.appendChild(a);a.click()}
+      window.__prog=1;window.__state='done'}catch(e){window.__err=String(e&&e.message||e);window.__state='error'}}}
 if(DBG){$('intro').hidden=true;document.body.insertAdjacentHTML('beforeend','<div id="dbg"></div><div id="cross"></div>');
   const u=()=>{const c=map.getCenter();$('dbg').textContent=c.lng.toFixed(5)+','+c.lat.toFixed(5)+' z'+map.getZoom().toFixed(1)+' b'+map.getBearing().toFixed(0)};map.on('move',u);
   const c=(Q.get('c')||'').split(',').map(Number);if(c.length>=2)map.jumpTo({center:[c[0],c[1]],zoom:c[2]||16,pitch:+Q.get('p')||0,bearing:0});u();
