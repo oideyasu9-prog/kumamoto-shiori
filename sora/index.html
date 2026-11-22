@@ -73,7 +73,7 @@ header h1{font-family:var(--mincho);font-weight:700;font-size:16px;margin:0;lett
 <div id="intro"><div>
   <small>卒業旅行 in 熊本</small>
   <h2><span class="nb">空から見る</span><span class="nb">2日間</span></h2>
-  <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどります。</span><br><span class="nb">3分ほどです。</span><span class="nb">とちゅうで止めて、</span><span class="nb">指で見回すこともできます。</span></p>
+  <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどります。</span><br><span class="nb">2分半ほどです。</span><span class="nb">とちゅうで止めて、</span><span class="nb">指で見回すこともできます。</span></p>
   <button id="go" type="button">飛びはじめる</button>
 </div></div>
 <section class="card" aria-live="polite">
@@ -102,8 +102,8 @@ const S=[
 ];
 const Q=new URLSearchParams(location.search),DBG=Q.has('edit');
 // 携帯：飛びながらだと写真が間に合わずぼやけるので、場所ごとに写真がそろってから見せる
-const CUT=Q.has('fly')?false:(Q.has('cut')||matchMedia('(max-width:820px),(pointer:coarse)').matches);
-const FINE=(window.devicePixelRatio||1)>=2;
+const CUT=Q.has('cut');
+const FINE=Q.has('fine');
 // 国土地理院の標高タイルを、地図の部品が読める形に直す（海は0mにする）
 maplibregl.addProtocol('gsidem',async(params,ac)=>{
   const mk=()=>{if(typeof OffscreenCanvas!=='undefined')return new OffscreenCanvas(256,256);const c=document.createElement('canvas');c.width=c.height=256;return c};
