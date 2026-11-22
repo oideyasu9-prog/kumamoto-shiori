@@ -232,7 +232,7 @@ if(REC){
   window.__state='ready';
   window.__shoot=async(doRec,fps=30)=>{window.__state=doRec?'recording':'warming';window.__prog=0;window.__err='';map.setPaintProperty('photo','raster-fade-duration',0);
     const cv=map.getCanvas(),N=Math.round(TOTAL*fps),parts=[];let enc=null,kind='';
-    try{if(doRec){const cfgs=[['h264',{codec:'avc1.64002A',width:cv.width,height:cv.height,bitrate:14e6,framerate:fps,avc:{format:'annexb'}}],['vp9',{codec:'vp09.00.40.08',width:cv.width,height:cv.height,bitrate:12e6,framerate:fps}]];
+    try{if(doRec){const cfgs=[['h264',{codec:'avc1.64002A',width:cv.width,height:cv.height,bitrate:10e6,framerate:fps,avc:{format:'annexb'}}],['vp9',{codec:'vp09.00.40.08',width:cv.width,height:cv.height,bitrate:12e6,framerate:fps}]];
         for(const[kd,c]of cfgs){const r=await VideoEncoder.isConfigSupported(c);if(r.supported){kind=kd;enc=new VideoEncoder({output:ch=>{const b=new Uint8Array(ch.byteLength);ch.copyTo(b);
               if(kind==='vp9'){const h=new DataView(new ArrayBuffer(12));h.setUint32(0,b.length,true);h.setUint32(4,Math.round(ch.timestamp*fps/1e6),true);parts.push(h.buffer)}parts.push(b)},error:e=>{window.__err='enc '+e.message}});enc.configure(c);break}}
         if(!enc)throw new Error('no encoder');window.__kind=kind;
@@ -240,7 +240,7 @@ if(REC){
       for(let f=0;f<N;f+=(doRec?1:6)){map.jumpTo(camAt(f/fps));let n=0;do{map.redraw();if(map.areTilesLoaded())break;await sleep(30)}while(++n<(doRec?70:25));
         if(doRec){map.redraw();const vf=new VideoFrame(cv,{timestamp:Math.round(f*1e6/fps),duration:Math.round(1e6/fps)});enc.encode(vf,{keyFrame:f%60===0});vf.close();while(enc.encodeQueueSize>6)await sleep(10)}
         window.__prog=f/N;if(f%15===0)await sleep(0);if(window.__err)throw new Error(window.__err)}
-      if(doRec){await enc.flush();enc.close();const b=new Blob(parts,{type:'application/octet-stream'});window.__size=b.size;const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='kumamoto-sora-koma.'+(kind==='vp9'?'ivf':'h264');document.body.appendChild(a);a.click()}
+      if(doRec){await enc.flush();enc.close();const b=new Blob(parts,{type:'application/octet-stream'});window.__size=b.size;const a=document.createElement('a');a.id='dl';a.href=URL.createObjectURL(b);a.download='kumamoto-sora-koma-'+kind+'.bin';a.textContent='録画を保存する';a.style.cssText='position:fixed;z-index:99;left:760px;top:40px;width:360px;height:120px;display:flex;align-items:center;justify-content:center;background:#e0b565;color:#10151c;font:700 28px sans-serif;border-radius:12px;text-decoration:none';document.body.appendChild(a)}
       window.__prog=1;window.__state='done'}catch(e){window.__err=String(e&&e.message||e);window.__state='error'}}}
 if(DBG){$('intro').hidden=true;document.body.insertAdjacentHTML('beforeend','<div id="dbg"></div><div id="cross"></div>');
   const u=()=>{const c=map.getCenter();$('dbg').textContent=c.lng.toFixed(5)+','+c.lat.toFixed(5)+' z'+map.getZoom().toFixed(1)+' b'+map.getBearing().toFixed(0)};map.on('move',u);
