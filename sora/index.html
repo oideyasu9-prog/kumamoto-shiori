@@ -64,6 +64,14 @@ header h1{font-family:var(--mincho);font-weight:700;font-size:16px;margin:0;lett
 #cross{position:fixed;z-index:30;left:50%;top:50%;width:20px;height:20px;margin:-10px;border:2px solid #f0f;border-radius:50%;pointer-events:none}
 .rec header,.rec .card,.rec .shade,.rec #intro,.rec #veil,.rec .maplibregl-ctrl-bottom-right,.rec .pin{display:none!important}
 .rec #map{inset:auto;left:0;top:0;width:720px;height:1280px}
+.vid #map,.vid .shade,.vid .card,.vid #intro,.vid #veil,.vid .maplibregl-ctrl-bottom-right{display:none!important}
+.vid header{position:static;padding:calc(10px + env(safe-area-inset-top)) 14px 8px}
+html.vid,html.vid body{overflow:auto;height:auto;min-height:100%}
+#vbox{display:none}
+.vid #vbox{display:block;max-width:520px;margin:0 auto;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+#vbox video{display:block;width:100%;height:auto;max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);background:#000;object-fit:contain}
+#vbox p{margin:14px 16px 0;font-size:13.5px;line-height:1.8;color:var(--sub)}
+#vbox a.alt{display:inline-flex;align-items:center;min-height:44px;margin:10px 16px 0;padding:8px 16px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px}
 @media (prefers-reduced-motion:reduce){.txt{transition:none}.pin span,.pin b{transition:none}}
 </style>
 </head>
@@ -71,6 +79,11 @@ header h1{font-family:var(--mincho);font-weight:700;font-size:16px;margin:0;lett
 <div id="map" role="application" aria-label="熊本の空からの地図"></div>
 <div class="shade t"></div><div class="shade b"></div>
 <header><a href="../">しおりにもどる</a><h1>空から見る2日間</h1></header>
+<div id="vbox">
+  <video controls playsinline preload="metadata" poster="sora-hyoshi.jpg" src="sora.mp4"></video>
+  <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどる動画です（3分）。</span><span class="nb">音楽が流れます。</span></p>
+  <a class="alt" href="?map">地図を指で動かして見る</a>
+</div>
 <div id="veil" aria-hidden="true"><small id="v1"></small><b id="v2"></b><i>空から近づいています</i></div>
 <div id="intro"><div>
   <small>卒業旅行 in 熊本</small>
@@ -84,8 +97,15 @@ header h1{font-family:var(--mincho);font-weight:700;font-size:16px;margin:0;lett
   <div class="bar"><button id="prev" type="button" aria-label="前の場所へ">◀</button><button id="play" type="button">止める</button><button id="next" type="button" aria-label="次の場所へ">▶</button></div>
   <div class="chips" id="chips"></div>
 </section>
+<script>
+// 携帯では、先に録った動画を見せる（地図を動かすと、機種や回線で粗く見えるため）。?map を付けると地図になる
+(function(){var q=new URLSearchParams(location.search);
+ window.__VIDEO=!q.has('map')&&!q.has('rec')&&!q.has('edit')&&!q.has('cut')&&!q.has('fly')&&matchMedia('(max-width:820px),(pointer:coarse)').matches;
+ if(window.__VIDEO)document.documentElement.classList.add('vid')})();
+</script>
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script>
+if(!window.__VIDEO){
 // 行程（しおりと同じ順番）。ll=[東経,北緯]  z=近さ  b=向き  o=ぐるっと回る角度
 const S=[
  {d:1,t:'8:45',n:'熊本空港に着く',m:'小牧から1時間半。阿蘇のふもとの空港に降ります。',ll:[130.8553,32.8373],z:13.4,b:60,o:50},
@@ -246,6 +266,7 @@ if(DBG){$('intro').hidden=true;document.body.insertAdjacentHTML('beforeend','<di
   const u=()=>{const c=map.getCenter();$('dbg').textContent=c.lng.toFixed(5)+','+c.lat.toFixed(5)+' z'+map.getZoom().toFixed(1)+' b'+map.getBearing().toFixed(0)};map.on('move',u);
   const c=(Q.get('c')||'').split(',').map(Number);if(c.length>=2)map.jumpTo({center:[c[0],c[1]],zoom:c[2]||16,pitch:+Q.get('p')||0,bearing:0});u();
   map.on('click',e=>{$('dbg').textContent+='\nclick '+e.lngLat.lng.toFixed(5)+','+e.lngLat.lat.toFixed(5)});window.__map=map}
+}
 </script>
 </body>
 </html>
