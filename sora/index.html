@@ -71,6 +71,7 @@ html.vid,html.vid body{overflow:auto;height:auto;min-height:100%}
 .vid #vbox{display:block;max-width:760px;margin:0 auto;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
 #vbox video{display:block;width:100%;height:auto;max-height:calc(100vh - 150px);max-height:calc(100dvh - 150px);background:#000;object-fit:contain}
 @media (orientation:landscape) and (max-height:520px){.vid #vbox{max-width:none}#vbox video{max-height:calc(100vh - 58px);max-height:calc(100dvh - 58px)}}
+.vid header{flex-wrap:wrap}.vid header h1{min-width:0;overflow-wrap:anywhere}#vbox .nb{display:inline}#vbox p,#vbox a.alt{overflow-wrap:anywhere;max-width:calc(100% - 32px);box-sizing:border-box}
 #vbox p{margin:14px 16px 0;font-size:13.5px;line-height:1.8;color:var(--sub)}
 #vbox a.alt{display:inline-flex;align-items:center;min-height:44px;margin:10px 16px 0;padding:8px 16px;border:1px solid var(--line);border-radius:999px;color:var(--ink);text-decoration:none;font-size:14px}
 @media (prefers-reduced-motion:reduce){.txt{transition:none}.pin span,.pin b{transition:none}}
@@ -81,7 +82,7 @@ html.vid,html.vid body{overflow:auto;height:auto;min-height:100%}
 <div class="shade t"></div><div class="shade b"></div>
 <header><a href="../">しおりにもどる</a><h1>空から見る2日間</h1></header>
 <div id="vbox">
-  <video controls playsinline preload="metadata" poster="sora-ai-hyoshi.jpg?v=6" src="sora-ai.mp4?v=6"></video>
+  <video controls playsinline preload="metadata" poster="sora-ai-hyoshi.jpg?v=7" src="sora-ai.mp4?v=7"></video>
   <p><span class="nb">しおりの行程を、</span><span class="nb">空から順にたどる動画です（2分23秒）。</span><span class="nb">音楽が流れます。</span><br><span class="nb">どの場所にも、兼子さん・大西さん・上池さんが</span><span class="nb">小さく隠れています。</span><span class="nb">止めて探してください。</span></p>
   <a class="alt" href="?map">地図を指で動かして見る</a>
 </div>
